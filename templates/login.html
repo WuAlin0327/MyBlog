@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title_link %}
+    <title>登陆页面</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+    <style>
+        body {
+            background: url("/static/image/bg.jpg");
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container" style="opacity:0.9;">
+        {% if not request.user.is_anonymous %}
+            <div class="jumbotron">
+                <h1 class="text-center">Hello,WelCome {{ request.user.username }}</h1>
+                <p class="text-center">欢迎！单击下面按钮可进行跳转</p>
+                <p class="text-center">
+                    <a href="/index/" class="btn btn-success">首页</a>
+                    <a href="#" class="btn btn-primary">我的博客</a>
+                </p>
+
+            </div>
+        {% else %}
+            <div class="jumbotron">
+                <h1 class="text-center">Hello,WelCome To MyBlog</h1>
+                <p class="text-center">请选择...</p>
+                <p class="text-center">
+                    <a href="#" data-toggle="modal" data-target=".bs-example-modal-lg"
+                       class="btn btn-success">登陆</a>
+                    <a href="#" data-toggle="modal" data-target="#myModal" class="btn btn-primary">注册</a>
+                </p>
+
+            </div>
+        {% endif %}
+
+    </div>
+    <div class="container" style="opacity:0.8;">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="thumbnail">
+                    <img src="/static/image/timg.jpeg" alt="">
+                    <p class="text-center">Python</p>
+                    <p class="text-center"><a href="https://www.python.org/"
+                                              class="btn btn-primary btn-sm">前往Python首页</a></p>
+
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="thumbnail">
+                    <p>到时候放编程语言介绍</p>
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="thumbnail">
+                    <p>到时候放编程语言介绍</p>
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <div class="thumbnail">
+                    <p>到时候放编程语言介绍</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

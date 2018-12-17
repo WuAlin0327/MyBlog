@@ -1,6 +1,8 @@
 from django.shortcuts import render,HttpResponse,redirect
 from django.http import JsonResponse
-from blog import verify_code
+from blog.utensil import verify_code
+from django.contrib import auth
+import json
 
 # Create your views here.
 
@@ -15,13 +17,25 @@ def verify_code_img(request):
     return HttpResponse(img)
 
 def login(request):
+    if request.method == 'POST':
+        response = {
+            'user':None,
+            'msg':None
+        }
+        user = request.POST.get('user')
+        pwd = request.POST.get('pwd')
+        ver_code = request.POST.get('verify')
+        verify = request.session.get('verify')
+        if ver_code.upper() == verify.upper():
+            user = auth.authenticate(username=user,password=pwd)
+            if user:
+                auth.login(request,user)
+                response['user'] = user.username
+            else:
+                response['msg'] = '账号或者密码错误'
+        else:
+            response['msg'] = '验证码错误'
 
-    user = request.POST.get('user')
-    pwd = request.POST.get('pwd')
-    ver_code = request.POST.get('verify')
-    verify = request.session.get('verify')
-    if ver_code.upper() == verify.upper():
-        pass
-    else:
-        pass
-    return JsonResponse({'status':'ok'})
+        res = json.dumps(response)
+        return HttpResponse(res)
+    return render(request,'login.html')

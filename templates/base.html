@@ -2,22 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+
+    {% block title_link %}
+        <title>首页</title>
+    {% endblock %}
     <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
     <script type="text/javascript" src="/static/js/jQuery3.3.1.js"></script>
     <link rel="stylesheet" href="/static/blog/bs/css/bootstrap.css">
     <script src="/static/blog/bs/js/bootstrap.js"></script>
+
+
     <style>
-        #verify_code_img{
+        .verify_code_img{
             margin-top: 24px;
         }
-    </style>
 
+    </style>
 
 </head>
 <body>
-<nav class="navbar navbar-inverse navbar-static-top">
-    <div class="container-fluid">
+{#导航栏#}
+<nav class="navbar navbar-inverse navbar-static-top" style="opacity:0.9;">
+    <div class="container">
+        <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
@@ -56,15 +63,24 @@
                 <button type="submit" class="btn btn-default">Submit</button>
             </form>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#" data-toggle="modal" data-target=".bs-example-modal-lg">登陆</a></li>
-                <li><a href="#">注册</a></li>
+                {% if not request.user.is_anonymous %}
+                    <li><a href="#">{{ request.user.username }}</a></li>
+                    <li><a href="#">注销</a></li>
+                    {% else %}
+                    <li><a href="#" data-toggle="modal" data-target=".bs-example-modal-lg">登陆</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#myModal">注册</a></li>
+                {% endif %}
+
             </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
+    </div>
+
 </nav>
 <!-- Large modal -->
 
 {#登陆模态框#}
+{% if request.user.is_anonymous %}
 <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" style="margin-top: 100px">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -92,11 +108,12 @@
 
                                     </div>
                                     <div class="col-md-6">
-                                        <img  alt="" id="verify_code_img" width="160" height="34" src="/verify_code_img/">
+                                        <img  alt="" class="verify_code_img" width="160" height="34" src="/verify_code_img/">
                                     </div>
 
                                 </div>
-                                <button type="button" class="btn btn-primary pull-right " id="login_btn">登陆</button>
+                                <button type="button" class="btn btn-primary" id="login_btn">登陆</button>
+                                <span class="error"></span>
                             </form>
                         </div>
                     </div>
@@ -106,6 +123,64 @@
         </div>
     </div>
 </div>
+{% else %}
+
+{% endif %}
+
+{#注册模态框 判断用户有没有登陆，如果登陆了则不加载这些内容 这样可以减少返回时的数据#}
+{% if request.user.is_anonymous %}
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="margin-top: 100px">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="row">
+          <div class="col-md-8 col-md-offset-2 ">
+                    <div class="panel panel-default" style="margin-top: 20px">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">注册</h3>
+                        </div>
+                        <div class="panel-body">
+                            <form>
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="user">用户名</label>
+                                    <input type="text" id="reg_user" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pwd">密码</label>
+                                    <input type="text" id="reg_pwd" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pwd">请再次输入密码</label>
+                                    <input type="text" id="r_reg_pwd" class="form-control">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label for="verify">验证码</label>
+                                        <input type="text" id="reg_verify" placeholder="验证码" class="form-control">
+
+                                    </div>
+                                    <div class="col-md-6">
+                                        <img  alt="" class="verify_code_img" width="160" height="34" src="/verify_code_img/">
+                                    </div>
+
+                                </div>
+                                <button type="button" class="btn btn-primary" id="reg_btn">登陆</button>
+                                <span class="error"></span>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    {% else %}
+
+{% endif %}
+{% block content %}
+
+{% endblock %}
 
 <script>
     // 基于ajax进行账号验证登陆
@@ -121,15 +196,25 @@
                 csrfmiddlewaretoken:$('[name=csrfmiddlewaretoken]').val()
             },
             success:function (data) {
-               console.log(data)
+               data = JSON.parse(data);
+               if (data.msg) {
+                  $('.error').html(data.msg).css({'color':'red'},'margin-left','10')
+                   setTimeout(function () {
+                    $('.error').html('')
+
+                   },2000)
+               }else{
+                   window.location.href = '/index/'
+               }
 
             }
 
         })
     });
 
+
     // 单击验证码图片可以对验证码进行刷新
-    $('#verify_code_img').click(function () {
+    $('.verify_code_img').click(function () {
         this.src += '?'
 
     })
