@@ -13,6 +13,10 @@
         .error{
             color: red;
         }
+        .jumbotron{
+            margin-top: 50px;
+            opacity:0.9;
+        }
     </style>
 
 {% endblock %}
@@ -21,7 +25,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
-                <div class="jumbotron" style="margin-top: 50px;opacity:0.9;">
+                <div class="jumbotron">
                     <h3>注册</h3>
                     <hr>
                     <form id="form">
@@ -34,9 +38,14 @@
                             </div>
                         {% endfor %}
                         <div class="form-group">
+                                <label for="blog_title">个人博客标题</label>
+                                <input type="text" id="blog_title" class="form-control">
+                            </div>
+                        <div class="form-group">
                             <label for="avatar">头像<img src="/static/blog/image/default.jpg" id="avatar_img" alt="" width="100" height="100"></label>
                             <input type="file" id="avatar">
                         </div>
+
                         <input type="button" id="reg_btn" class="btn btn-primary" value="注册">
                         <span id="reg_error"></span>
                     </form>
@@ -55,14 +64,14 @@
 
         //  获取form下的有效控件
         var request_data = $('#form').serializeArray();
-        console.log(request_data)
+        console.log(request_data);
         $.each(request_data,function (index,data) {
             formdata.append(data.name,data.value)
         });
 
         //上传文件
         formdata.append('avatar',$('#avatar')[0].files[0]);
-        console.log(formdata);
+        formdata.append('blog_title',$('#blog_title').val())
 
         $.ajax({
             url: '/register/',

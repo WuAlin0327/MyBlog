@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('nid', models.AutoField(primary_key=True, serialize=False)),
                 ('telephone', models.CharField(max_length=11, null=True, unique=True)),
-                ('avatar', models.FileField(default='/avatars/default.png', upload_to='avatars/')),
+                ('avatar', models.FileField(default='/avatars/default.jpg', upload_to='avatars/')),
                 ('create_time', models.DateTimeField(auto_now_add=True, verbose_name='创建时间')),
             ],
             options={

@@ -16,14 +16,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,re_path
 from blog import views
+from django.views.static import serve
+from MyBlog import settings
 from django.conf.urls import url
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('index/',views.index),
     path('verify_code_img/',views.verify_code_img),
     path('home/',views.login,name='home'),
+    re_path(r'^$',views.login,),
     path('logout/',views.logout),
-    path('register/',views.register)
+    path('register/',views.register),
+    re_path('media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT})
 ]
 
 

@@ -1,1 +1,130 @@
 {% extends 'base.html' %}
+
+{% block title_link %}
+    <title>首页</title>
+    <style>
+        .tail{
+            margin-top: 10px;
+            padding-left: 68px;
+        }
+        .icon{
+            vertical-align: -3px;
+            margin-left: 8px
+        }
+        .jumbotron{
+            opacity: 0.95;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-2">
+                <div class="panel panel-success">
+                    <div class="panel-heading">文章分类</div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">发布时间</div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+
+                <div class="jumbotron">
+                    {% for article in article_list %}
+                        <div class="media">
+                            <div class="media-left">
+                                <a href="#">
+                                    <img class="media-object" width="56" height="56" src="media/{{ article.user.avatar }}" alt="...">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                <h4 class="media-heading"><a href="">{{ article.title }}</a></h4>
+                                <span>{{ article.desc }}</span>
+                            </div>
+                            <div class="tail">
+                                <a href="">{{ article.user.username }}</a><span>发布于</span><a href="#">{{ article.create_time }}</a>
+                                <a href="#"><span class="glyphicon glyphicon-comment icon"></span> <span class="badge">评论{{ article.comment_count }}</span></a>
+                                <a href="#"><span class="glyphicon glyphicon-heart icon"></span> <span class="badge">点赞{{ article.up_count }}</span></a>
+                            </div>
+                        </div>
+                        <hr>
+
+                    {% endfor %}
+
+
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="panel panel-success">
+                    <div class="panel-heading">广告区域</div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">待填充</div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                    <div class="panel-body">
+                        Panel content
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
