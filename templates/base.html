@@ -63,7 +63,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if not request.user.is_anonymous %}
                         <li><a href="#" class="btn"><span id="user-icon" class="glyphicon glyphicon-user"></span>{{ request.user.username }}</a></li>
-                        <li><a href="#" class="btn">个人博客</a></li>
+                        <li><a href="/{{ user.username }}" class="btn">个人博客</a></li>
                         <li><a href="#" class="btn">随笔</a></li>
                         <li>
                             <a class="btn" type="button">

@@ -2,19 +2,7 @@
 
 {% block title_link %}
     <title>首页</title>
-    <style>
-        .tail{
-            margin-top: 10px;
-            padding-left: 68px;
-        }
-        .icon{
-            vertical-align: -3px;
-            margin-left: 8px
-        }
-        .jumbotron{
-            opacity: 0.95;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/blog/css/home_site.css">
 {% endblock %}
 
 {% block content %}
@@ -70,10 +58,10 @@
                             </div>
                             <div class="media-body">
                                 <h4 class="media-heading"><a href="">{{ article.title }}</a></h4>
-                                <span>{{ article.desc }}</span>
+                                <span class="aritcle_desc">{{ article.desc }}</span>
                             </div>
                             <div class="tail">
-                                <a href="">{{ article.user.username }}</a><span>发布于</span><a href="#">{{ article.create_time }}</a>
+                                <a href="">{{ article.user.username }}</a><span>发布于{{ article.create_time }}</span>
                                 <a href="#"><span class="glyphicon glyphicon-comment icon"></span> <span class="badge">评论{{ article.comment_count }}</span></a>
                                 <a href="#"><span class="glyphicon glyphicon-heart icon"></span> <span class="badge">点赞{{ article.up_count }}</span></a>
                             </div>

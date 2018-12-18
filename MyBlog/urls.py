@@ -27,7 +27,11 @@ urlpatterns = [
     re_path(r'^$',views.login,),
     path('logout/',views.logout),
     path('register/',views.register),
-    re_path('media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT})
+    re_path('media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
+    re_path('(?P<username>\w+)/articles/(?P<article_id>\d+)/$',views.article_detail),
+    # 个人站点URL
+    re_path('(?P<username>\w+)/$',views.home_site),
+    re_path('(?P<username>\w+)/(?P<condition>tag|category|archive)/(?P<param>.*)$',views.home_site)
 ]
 
 

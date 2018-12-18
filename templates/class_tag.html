@@ -1,0 +1,48 @@
+<div>
+                   <div class="panel panel-default">
+                    <div class="panel-heading">个人信息</div>
+                    <div class="panel-body">
+                        <address>
+                            <strong>MyBlog, info.</strong><br>
+                            昵称：{{ user.username }}<br>
+                            加入时间：{{ user.create_time|date:'Y-m-d' }}<br>
+                            <abbr title="Phone">P:</abbr> {{ user.telephone }}
+                        </address>
+
+                        <address>
+                            <strong>Email</strong><br>
+                            <a href="mailto:#">{{ user.email     }}</a>
+                        </address>
+                    </div>
+                </div>
+                {#                渲染标签#}
+                <div class="panel panel-info">
+                    <div class="panel-heading ">我的标签</div>
+                    {% for tag in tag_list %}
+                        <div class="panel-body ">
+                            <a href="/{{user.username }}/tag/{{ tag.title }}" class="btn btn-default">{{ tag.title }} <span
+                                    class="badge">{{ tag.c }}</span></a>
+                        </div>
+                    {% endfor %}
+                </div>
+                {#            渲染时间归档#}
+                <div class="panel panel-success ">
+                    <div class="panel-heading">随笔归档</div>
+                    {% for date in date_list %}
+                        <div class="panel-body ">
+                            <a href="/{{user.username }}/archive/{{ date.month|date:'Y-m' }}" class="btn btn-default">{{ date.month|date:'Y年-m月' }} <span
+                                    class="badge">{{ date.c }}</span></a>
+                        </div>
+                    {% endfor %}
+                </div>
+                {#            渲染分类#}
+                <div class="panel panel-warning ">
+                    <div class="panel-heading ">随笔分类</div>
+                    {% for cate in cate_list %}
+                        <div class="panel-body">
+                            <a href="/{{user.username }}/category/{{ cate.title }}" class="btn btn-default">{{ cate.title }} <span
+                                    class="badge">{{ cate.c }}</span></a>
+                        </div>
+                    {% endfor %}
+                </div>
+</div>
