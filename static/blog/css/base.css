@@ -1,0 +1,12 @@
+ .verify_code_img {
+            margin-top: 24px;
+        }
+
+        body {
+            background: url("/static/blog/image/bg.jpg");
+        }
+        #user-icon{
+            font-size: 18px;
+            vertical-align: -3px;
+            margin-right: 5px;
+        }

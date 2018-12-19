@@ -1,0 +1,13 @@
+.jumbotron.jum {
+
+            height: 160px;
+        }
+
+        .panel {
+            opacity: .9;
+        }
+        .pub_info{
+            color: darkgrey;
+            margin-left: 10px;
+            margin-top: 10px;
+        }

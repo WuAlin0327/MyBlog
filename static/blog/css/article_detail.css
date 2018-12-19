@@ -1,0 +1,19 @@
+
+.up{
+    width: 60px;
+    height: 60px;
+    float: left;
+    cursor:pointer;
+    clear: both;
+}
+.down{
+    float: right;
+    width: 70px;
+    height: 60px;
+    cursor:pointer;
+    padding-left: 20px;
+}
+.hint{
+    padding-top: 10px;
+    color: red;
+}

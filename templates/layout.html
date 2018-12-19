@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title_link %}
+    <title>{{ user.username }}</title>
+    <link rel="stylesheet" href="/static/blog/css/layout.css">
+    <link rel="stylesheet" href="/static/blog/css/home_site.css">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9">
+
+            {% block layout %}
+{#                这里是放文章详情页的#}
+            {% endblock %}
+            </div>
+
+        <div class="col-lg-3">
+            {% load my_tags %}
+            {% get_left_label request.user.username %}
+
+        </div>
+        </div>
+    </div>
+{% endblock %}

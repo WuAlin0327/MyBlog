@@ -1,7 +1,8 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
-from django.db.models import Avg,Count,Max,Min
+from django.db.models import Avg,Count,Max,Min,F
+
 from blog.utensil import verify_code, My_forms
 from django.contrib import auth
 from blog.models import *
@@ -103,8 +104,6 @@ def home_site(request,username,**kwargs):
     :param request:
     :return:
     '''
-
-    print('kwargs',kwargs)
     # 用户对象查询
     user = UserInfo.objects.filter(username=username).first()
 
@@ -160,4 +159,37 @@ def article_detail(request,username,article_id):
     :param article_id:
     :return:
     '''
+    article = Article.objects.filter(pk=article_id).first()
+
     return render(request,'article_detail.html',locals())
+
+def digg(request):
+    '''
+    点赞视图函数
+    :param request:
+    :return:
+    '''
+
+    article_id = request.POST.get('article_id')
+    is_up = json.loads(request.POST.get('is_up'))
+    user_id = request.user.pk
+
+    # 判断点赞踩灭记录是否存在，如果存在则返回不能重复点赞，如果不存在则添加记录
+    article_up_down = ArticleUpDown.objects
+    is_exist = article_up_down.filter(user_id=user_id,article_id=article_id).first()
+
+    response = {'msg': None, 'status': True}
+    if is_exist:
+        response['status'] = False
+        response['handled'] = is_exist.is_up
+    else:
+        # 判断是点赞还是踩灭
+        article_obj = Article.objects.filter(pk=article_id)
+        if is_up:
+            article_obj.update(up_count=F('up_count') + 1)
+        else:
+            article_obj.update(down_count=F('down_count') + 1)
+
+        article_up_down.create(user_id=user_id, article_id=article_id, is_up=is_up)
+
+    return JsonResponse(response)

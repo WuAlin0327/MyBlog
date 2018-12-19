@@ -10,23 +10,9 @@
     <script type="text/javascript" src="/static/blog/js/jQuery3.3.1.js"></script>
     <link rel="stylesheet" href="/static/blog/bs/css/bootstrap.css">
     <script src="/static/blog/bs/js/bootstrap.js"></script>
+    <script src="/static/blog/js/login.js"> </script>
+    <link rel="stylesheet" href="/static/blog/css/base.css">
 
-
-    <style>
-        .verify_code_img {
-            margin-top: 24px;
-        }
-
-        body {
-            background: url("/static/blog/image/bg.jpg");
-        }
-        #user-icon{
-            font-size: 18px;
-            vertical-align: -3px;
-            margin-right: 5px;
-        }
-
-    </style>
 
 </head>
 <body>
@@ -155,44 +141,7 @@
 
 {% endblock %}
 
-<script>
-    // 基于ajax进行账号验证登陆
-    $("#login_btn").click(function () {
-        console.log(111);
-        $.ajax({
-            url: '/home/',
-            type: 'post',
-            data: {
-                user: $('#user').val(),
-                pwd: $('#pwd').val(),
-                verify: $('#verify').val(),
-                csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
-            },
-            success: function (data) {
-                data = JSON.parse(data);
-                if (data.msg) {
-                    $('.error').html(data.msg).css({'color': 'red'}, 'margin-left', '10')
-                    setTimeout(function () {
-                        $('.error').html('')
 
-                    }, 2000)
-                } else {
-                    window.location.href = '/index/'
-                }
-
-            }
-
-        })
-    });
-
-
-    // 单击验证码图片可以对验证码进行刷新
-    $('.verify_code_img').click(function () {
-        this.src += '?'
-
-    });
-
-</script>
 
 {% block script %}
 
