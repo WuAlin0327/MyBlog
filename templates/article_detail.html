@@ -6,74 +6,203 @@
 
 {% block layout %}
     {% csrf_token %}
-        <div class="jumbotron clearfix">
-            <h3 class="text-center">{{ article.title }}</h3>
-            <hr>
+    <div class="jumbotron clearfix" style="opacity: .9">
+        <h3 class="text-center">{{ article.title }}</h3>
+        <hr>
         <div>
             <span>{{ article.content|safe }}</span>
 
         </div>
-            <hr>
+        <hr>
+        <div class="clearfix">
             <div id="up-or-down" style="float: right">
                 <div class="up action">
                     <span><img width="40px" height="40px" src="/static/blog/image/点赞.png" alt=""></span>
                     <br>
-                    <span class="small">推荐(<span class="up_count">{{ article.up_count }}</span>)</span>
-                    
+                    <span class="small">推荐(<span class="count">{{ article.up_count }}</span>)</span>
+
                 </div>
                 <div class="down action">
                     <span><img width="40px" height="40px" src="/static/blog/image/踩.png" alt=""></span>
                     <br>
-                    <span class="small ">不推荐(<span class="down_count">{{ article.down_count }}</span>)</span>
+                    <span class="small ">不推荐(<span class="count">{{ article.down_count }}</span>)</span>
                 </div>
                 <span class="clearfix hint"></span>
             </div>
-
         </div>
+
+
+        <div class="comments">
+            <div class="row">
+                <div class="col-md-12">
+                    <p>评论列表</p>
+                    <div>
+                        <ul class="list-group comment-list">
+                            {% for comment in comment_content %}
+                                <li class="list-group-item">
+                                    <p style="font-size: 15px">
+                                        <a href="#">#{{ forloop.counter }}楼&nbsp&nbsp </a>
+                                        <button class="btn btn-success pull-right reply-btn"
+                                                comment_pk="{{ comment.pk }}">回复
+                                        </button>
+                                        <a class="comment_user"
+                                           href="/{{ comment.user.username }}/">{{ comment.user.username }}</a>
+                                        <span>发布于</span>
+                                        <span style="color: #666">@post{{ comment.create_time|date:'Y-m-d H:i' }}</span>
+                                    </p>
+                                    <hr>
+                                    {% if comment.parent_comment_id %}
+                                        <div class=" well">
+                                            <p style="font-size: 14px">@{{ comment.parent_comment.user.username }}&nbsp;&nbsp;{{ comment.parent_comment.create_time|date:'Y-m-d H:i' }}&nbsp;&nbsp;:</p>
+                                            <p style="font-size: 16px">{{ comment.parent_comment.content }}</p>
+                                        </div>
+
+                                    {% endif %}
+                                    <p>
+                                        {{ comment.content }}
+                                    </p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <p>发表评论</p>
+                    <p>
+                        <span class="glyphicon glyphicon-user">昵称：</span><input type="text" class="form-control"
+                                                                                value="{{ request.user.username }}">
+                    </p>
+                    <p>
+                        评论内容：
+                    </p>
+                    <textarea name="" id="comment_content" cols="65" rows="10"
+                              class="form-control form-group"></textarea>
+                    <button class="btn btn-primary comment_btn">提交评论</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
 {% endblock %}
 
 {% block script %}
     <script>
+
+        //点赞踩灭
         $('.action').click(function () {
+
+            //找到当前点击的儿子.count
+            var $count = $(this).find('.count');
             var is_up = $(this).hasClass('up');
             console.log(is_up);
             $.ajax({
                 //点赞
-                url:'/digg/',
-                type:'post',
-                data:{
-                    "csrfmiddlewaretoken":$('[name="csrfmiddlewaretoken"]').val(),
-                    "is_up":is_up,
+                url: '/digg/',
+                type: 'post',
+                data: {
+                    "csrfmiddlewaretoken": $('[name="csrfmiddlewaretoken"]').val(),
+                    "is_up": is_up,
                     "article_id":{{ article.pk }}
                 },
-                success:function (data) {
+                success: function (data) {
                     console.log(data);
-                   if (data.status){
-                       if (is_up){
-                           let up_obj = $('.up_count');
-                           let up_count = Number(up_obj.html());
-                           up_obj.html(up_count+1)
-                       }else{
-                           let down_obj = $('.down_count');
-                           let down_count = Number(down_obj.html());
-                           down_obj.html(down_count+1)
-                       }
-                   }else{
-                       if (data.handled) {
-                         $('.hint').html('你已经推荐过');
+                    if (data.status) {
+                        var num = Number($count.text());
+                        $count.html(num + 1);
+                    } else {
+                        var val = data.handled ? '你已经推荐过' : '你已经反对过';
+                        $('.hint').html(val);
 
-                       }
-                       else{
-                           $('.hint').html('你已经反对过');
-
-                       }
-                       setTimeout(function () {
+                        setTimeout(function () {
                             $('.hint').html('')
-                           },2000)
+                        }, 2000)
 
-                   }
+                    }
                 }
             });
+        });
+
+        //评论事件
+        var pid = '';
+        $('.comment_btn').click(function () {
+            var $content = $('#comment_content').val();
+            if (pid) {
+                var index = $content.indexOf('\n');
+                $content = $content.slice(index + 1)
+            }
+            $.ajax({
+                url: '/comment/',
+                type: 'post',
+                data: {
+                    "csrfmiddlewaretoken": $('[name="csrfmiddlewaretoken"]').val(),
+                    "article_id":{{ article.pk }},
+                    "content": $content,
+                    'pid': pid
+                },
+                success: function (data) {
+                    console.log(data,typeof data);
+                    var add_comment = '';
+
+                    //判断是根评论还是子评论
+                    if (pid){
+                        add_comment = `
+                         <li class="list-group-item">
+                                    <p style="font-size: 15px">
+                                        <a href="#">最新&nbsp&nbsp </a>
+                                        <button class="btn btn-success pull-right reply-btn">回复</button>
+                                        <a class="comment_user"
+                                           href="/${ data.username }/">${ data.username }</a>
+                                        <span>发布于</span>
+                                        <span style="color: #666">@post${data.create_time}</span>
+                                    </p>
+                                    <hr>
+                                        <div class=" well">
+                                            <p style="font-size: 14px">@${data.parent_comment_user}&nbsp;&nbsp;${data.parent_comment_create_time}&nbsp;&nbsp;:</p>
+                                            <p style="font-size: 16px">${data.parent_comment_content}</p>
+                                        </div>
+                                    <p>
+                                        ${data.content}
+                                    </p>
+                                </li>
+
+                        `
+                    }else{
+                        add_comment = `
+                    <li class="list-group-item">
+                                        <p style="font-size: 15px">
+                                            <a href="#">最新&nbsp&nbsp </a>
+                                            <button class="btn btn-success pull-right">回复</button>
+                                            <span>${data.username}</span>
+                                            <span>发布于</span>
+                                            <span style="color: #666">@post${data.create_time}</span>
+                                        </p>
+
+                                    <hr>
+                                    <p>
+                                        ${data.content}
+                                    </p>
+                                </li>
+                                `;
+                    }
+                    $('ul.comment-list').append(add_comment);
+                    //清空评论框
+                    $('#comment_content').val('');
+                    //重置pid
+                    pid = ''
+                }
+            })
+
+        });
+
+        //回复按钮事件
+        $('.reply-btn').click(function () {
+            var reply_user = $(this).next().text();
+            $('#comment_content').focus().val('@' + reply_user + '\n');
+            pid = $(this).attr('comment_pk');
+            console.log(pid)
+
+
         })
+
+
     </script>
 {% endblock %}

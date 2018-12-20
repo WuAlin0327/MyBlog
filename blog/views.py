@@ -160,6 +160,7 @@ def article_detail(request,username,article_id):
     :return:
     '''
     article = Article.objects.filter(pk=article_id).first()
+    comment_content = Comment.objects.filter(article_id=article_id)
 
     return render(request,'article_detail.html',locals())
 
@@ -192,4 +193,23 @@ def digg(request):
 
         article_up_down.create(user_id=user_id, article_id=article_id, is_up=is_up)
 
+    return JsonResponse(response)
+
+
+def comment(request):
+    pid = request.POST.get('pid')
+    content = request.POST.get('content')
+    article_id = request.POST.get('article_id')
+    Article.objects.filter(pk=article_id).update(comment_count = F('comment_count')+1)
+    user = request.user.pk
+    comment = Comment.objects.create(user_id=user,content=content,parent_comment_id=pid,article_id=article_id)
+    response = {
+        'username':request.user.username,
+        'content':content,
+        'create_time':comment.create_time.strftime('%Y-%m-%d %X')
+    }
+    if pid:
+        response['parent_comment_user'] = comment.parent_comment.user.username
+        response['parent_comment_content'] = comment.parent_comment.content
+        response['parent_comment_create_time'] = comment.parent_comment.create_time.strftime('%Y-%m-%d %X')
     return JsonResponse(response)

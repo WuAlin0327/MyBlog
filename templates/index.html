@@ -57,7 +57,7 @@
                                 </a>
                             </div>
                             <div class="media-body">
-                                <h4 class="media-heading"><a href="">{{ article.title }}</a></h4>
+                                <h4 class="media-heading"><a href="/{{ request.user.username }}/articles/{{ article.nid }}">{{ article.title }}</a></h4>
                                 <span class="aritcle_desc">{{ article.desc }}</span>
                             </div>
                             <div class="tail">

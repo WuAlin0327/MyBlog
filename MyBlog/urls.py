@@ -14,26 +14,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,re_path
+from django.urls import path, re_path
 from blog import views
 from django.views.static import serve
 from MyBlog import settings
 from django.conf.urls import url
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('index/',views.index),
-    path('verify_code_img/',views.verify_code_img),
-    path('home/',views.login,name='home'),
-    path('digg/',views.digg),
-    re_path(r'^$',views.login,),
-    path('logout/',views.logout),
-    path('register/',views.register),
-    re_path('media/(?P<path>.*)$',serve,{'document_root':settings.MEDIA_ROOT}),
-    re_path('(?P<username>\w+)/articles/(?P<article_id>\d+)/$',views.article_detail),
+    path('index/', views.index),
+    path('verify_code_img/', views.verify_code_img),
+    path('home/', views.login, name='home'),
+    path('digg/', views.digg),
+    path('comment/', views.comment),
+    re_path(r'^$', views.login, ),
+    path('logout/', views.logout),
+    path('register/', views.register),
+    re_path('media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path('(?P<username>\w+)/articles/(?P<article_id>\d+)/$', views.article_detail),
     # 个人站点URL
-    re_path('(?P<username>\w+)/$',views.home_site),
-    re_path('(?P<username>\w+)/(?P<condition>tag|category|archive)/(?P<param>.*)$',views.home_site),
+    re_path('(?P<username>\w+)/$', views.home_site),
+    re_path('(?P<username>\w+)/(?P<condition>tag|category|archive)/(?P<param>.*)$', views.home_site),
 
 ]
-
-
