@@ -2,9 +2,12 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
 from django.db.models import Avg,Count,Max,Min,F
-
+from django.db import transaction
 from blog.utensil import verify_code, My_forms
 from django.contrib import auth
+from django.core.mail import send_mail
+from MyBlog import settings
+from threading import Thread
 from blog.models import *
 import json
 
@@ -200,9 +203,13 @@ def comment(request):
     pid = request.POST.get('pid')
     content = request.POST.get('content')
     article_id = request.POST.get('article_id')
-    Article.objects.filter(pk=article_id).update(comment_count = F('comment_count')+1)
     user = request.user.pk
-    comment = Comment.objects.create(user_id=user,content=content,parent_comment_id=pid,article_id=article_id)
+    article_obj = Article.objects.filter(pk=article_id)
+    print(article_id)
+    with transaction.atomic():
+        article_obj.update(comment_count=F('comment_count') + 1)
+        comment = Comment.objects.create(user_id=user,content=content,parent_comment_id=pid,article_id=article_id)
+
     response = {
         'username':request.user.username,
         'content':content,
@@ -212,4 +219,29 @@ def comment(request):
         response['parent_comment_user'] = comment.parent_comment.user.username
         response['parent_comment_content'] = comment.parent_comment.content
         response['parent_comment_create_time'] = comment.parent_comment.create_time.strftime('%Y-%m-%d %X')
+
+    # 发送邮件
+    '''
+    在settings.py中配置以下内容
+    EMAIL_HOST = 'smtp.exmail.qq.com'  
+    EMAIL_PORT = 456
+    EMAIL_HOST_USER = ''    # 账号
+    EMAIL_HOST_PASSWORD = ''  #密码
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    EMAIL_USE_SSL = True  #证书
+    
+    '''
+
+    # send_mail(
+    #     '您的文章%s新增了一条评论'%article_obj[0].title,# 标题
+    #           content,# 内容
+    #     settings.EMAIL_HOST_USER,
+    #     ['15083623778@163.com'] # 发送用户邮箱
+    # )
+    send = Thread(target=send_mail,args=(
+        '您的文章%s新增了一条评论'%article_obj[0].title,
+              content,
+        settings.EMAIL_HOST_USER,
+        ['15083623778@163.com']))
+    send.start()
     return JsonResponse(response)

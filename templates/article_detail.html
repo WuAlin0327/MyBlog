@@ -32,6 +32,16 @@
         </div>
 
 
+{#        评论之评论树方式展示#}
+{#        <div class="comments">#}
+{#            <div class="row">#}
+{#                <div class="col-lg-12">#}
+{#                    <p>评论列表：评论数方式展示</p>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+
+{#        评论之层级展示#}
         <div class="comments">
             <div class="row">
                 <div class="col-md-12">
@@ -199,8 +209,6 @@
             $('#comment_content').focus().val('@' + reply_user + '\n');
             pid = $(this).attr('comment_pk');
             console.log(pid)
-
-
         })
 
 
