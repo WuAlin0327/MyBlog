@@ -1,22 +1,26 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.db.models.functions import TruncMonth
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.db.models import Avg,Count,Max,Min,F
+from django.db.models import Avg, Count, Max, Min, F
 from django.db import transaction
 from blog.utensil import verify_code, My_forms
 from django.contrib import auth
 from django.core.mail import send_mail
 from MyBlog import settings
 from threading import Thread
+from bs4 import BeautifulSoup
 from blog.models import *
 import json
+import os
+
 
 # Create your views here.
 
 
 def index(request):
-    article_list = Article.objects.all()
-    return render(request, 'index.html',locals())
+    article_list = Article.objects.all().order_by('-create_time')
+
+    return render(request, 'index.html', locals())
 
 
 def verify_code_img(request):
@@ -91,17 +95,19 @@ def register(request):
             extra = {}
             if file_obj:
                 extra['avatar'] = file_obj
-            UserInfo.objects.create_user(username=user, password=pwd, email=email, **extra)
+
             blog_title = request.POST.get('blog_title')
-            Blog.objects.create(title=blog_title,site_name=user,theme=user+'的个人博客')
+            blog = Blog.objects.create(title=blog_title, site_name=user, theme=user + '的个人博客')
+            UserInfo.objects.create_user(username=user, password=pwd, email=email, **extra,blog_id =blog.nid)
+
         else:
             response['msg'] = form.errors
         return JsonResponse(response)
     form = My_forms.User()
     return render(request, 'register.html', locals())
 
-
-def home_site(request,username,**kwargs):
+@login_required
+def home_site(request, username, **kwargs):
     '''
     个人站点视图函数
     :param request:
@@ -109,10 +115,11 @@ def home_site(request,username,**kwargs):
     '''
     # 用户对象查询
     user = UserInfo.objects.filter(username=username).first()
+    print(user)
 
     # 判断用户是否存在
     if not user:
-        return render(request,'not_font.html')
+        return render(request, 'not_font.html')
 
     # 个人站点文章
     article_list = Article.objects.filter(user=user)
@@ -124,9 +131,8 @@ def home_site(request,username,**kwargs):
         elif condition == 'tag':
             article_list = article_list.filter(tags__title=param)
         else:
-            year,month = param.split('-')
-            article_list = article_list.filter(create_time__year=year,create_time__month=month)
-
+            year, month = param.split('-')
+            article_list = article_list.filter(create_time__year=year, create_time__month=month)
 
     # 个人站点查询
     blog = user.blog
@@ -152,9 +158,11 @@ def home_site(request,username,**kwargs):
     # # 使用方式2实现方式1
     # date_list = Article.objects.filter(user=user).annotate(month=TruncMonth('create_time')).values('month').annotate(c=Count('nid')).values('month','c')
 
-    return render(request,'home_site.html',locals())
+    return render(request, 'home_site.html', locals())
 
-def article_detail(request,username,article_id):
+
+@login_required
+def article_detail(request, username, article_id):
     '''
     文章详细页视图
     :param request:
@@ -165,7 +173,8 @@ def article_detail(request,username,article_id):
     article = Article.objects.filter(pk=article_id).first()
     comment_content = Comment.objects.filter(article_id=article_id)
 
-    return render(request,'article_detail.html',locals())
+    return render(request, 'article_detail.html', locals())
+
 
 def digg(request):
     '''
@@ -177,10 +186,9 @@ def digg(request):
     article_id = request.POST.get('article_id')
     is_up = json.loads(request.POST.get('is_up'))
     user_id = request.user.pk
-
     # 判断点赞踩灭记录是否存在，如果存在则返回不能重复点赞，如果不存在则添加记录
     article_up_down = ArticleUpDown.objects
-    is_exist = article_up_down.filter(user_id=user_id,article_id=article_id).first()
+    is_exist = article_up_down.filter(user_id=user_id, article_id=article_id).first()
 
     response = {'msg': None, 'status': True}
     if is_exist:
@@ -200,6 +208,11 @@ def digg(request):
 
 
 def comment(request):
+    '''
+    文章评论功能
+    :param request:
+    :return:
+    '''
     pid = request.POST.get('pid')
     content = request.POST.get('content')
     article_id = request.POST.get('article_id')
@@ -208,12 +221,12 @@ def comment(request):
     print(article_id)
     with transaction.atomic():
         article_obj.update(comment_count=F('comment_count') + 1)
-        comment = Comment.objects.create(user_id=user,content=content,parent_comment_id=pid,article_id=article_id)
+        comment = Comment.objects.create(user_id=user, content=content, parent_comment_id=pid, article_id=article_id)
 
     response = {
-        'username':request.user.username,
-        'content':content,
-        'create_time':comment.create_time.strftime('%Y-%m-%d %X')
+        'username': request.user.username,
+        'content': content,
+        'create_time': comment.create_time.strftime('%Y-%m-%d %X')
     }
     if pid:
         response['parent_comment_user'] = comment.parent_comment.user.username
@@ -238,10 +251,130 @@ def comment(request):
     #     settings.EMAIL_HOST_USER,
     #     ['15083623778@163.com'] # 发送用户邮箱
     # )
-    send = Thread(target=send_mail,args=(
-        '您的文章%s新增了一条评论'%article_obj[0].title,
-              content,
+    send = Thread(target=send_mail, args=(
+        '您的文章%s新增了一条评论' % article_obj[0].title,
+        content,
         settings.EMAIL_HOST_USER,
         ['15083623778@163.com']))
     send.start()
+    return JsonResponse(response)
+
+
+def manage_article(request, username):
+    '''
+    新增文章
+    :param request:
+    :param username:
+    :return:
+    '''
+    if request.method == 'POST':
+        print(request.POST)
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        soup = BeautifulSoup(content, 'html.parser')
+        for tag in soup.find_all():
+            if tag.name == 'script':
+                tag.decompose()
+        desc = soup.text[0:150]
+        category_id = request.POST.get('select_id')
+        tag_id = request.POST.get('tag_id')
+
+        article = Article.objects.create(title=title, content=str(soup), desc=desc, user=request.user, category_id=category_id)
+        Article2Tag.objects.create(tag_id=tag_id, article_id=article.nid)
+        return redirect('/%s/' % username)
+    # 获取分类
+    category = Category.objects.filter(blog_id=request.user.blog.nid)
+    tag = Tag.objects.filter(blog_id=request.user.blog.nid)
+    return render(request, 'article_manage.html', locals())
+
+
+def upload(request):
+    '''
+    文本编辑器图片上传
+    :param request:
+    :return:
+    '''
+    print(request.FILES)
+    img = request.FILES.get('imgFile')
+
+    path = os.path.join(settings.MEDIA_ROOT, 'article_img', img.name)
+    with open(path, 'wb') as f:
+        for line in img:
+            f.write(line)
+    response = {
+        'error': 0,
+        'url': 'media/article_img/%s' % img.name
+    }
+    return JsonResponse(response)
+
+
+def remove_article(request, username, article_id):
+    '''
+    删除文章
+    :param request:
+    :param username:
+    :param article_id:
+    :return:
+    '''
+    if request.user.username == username:
+        Article.objects.filter(pk=article_id).delete()
+
+        return redirect('/%s/' % username)
+
+    return HttpResponse('无法删除他人文章')
+
+
+def edit_article(request, username, article_id):
+    '''
+    编辑文章内容
+    :param request:
+    :param username:
+    :param article_id:
+    :return:
+    '''
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        soup = BeautifulSoup(content, 'html.parser')
+        for tag in soup.find_all():
+            if tag.name == 'script':
+                tag.decompose()
+        desc = soup.text[0:150]
+        Article.objects.filter(pk=article_id).update(title=title, content=str(soup), desc=desc)
+
+        return redirect('/%s/' % username)
+    article = Article.objects.filter(pk=article_id).first()
+    return render(request, 'edit_article.html', locals())
+
+
+def add_category(request):
+    '''
+    新增分类
+    :param request:
+    :return:
+    '''
+    blog_id = request.POST.get('blog_id')
+    title = request.POST.get('category_title')
+    Category.objects.create(blog_id=blog_id, title=title)
+    response = {
+        'status': True,
+        'user': request.user.username
+    }
+    return JsonResponse(response)
+
+
+def add_tag(request):
+    '''
+    新增标签
+    :param request:
+    :return:
+    '''
+    blog_id = request.POST.get('blog_id')
+    title = request.POST.get('tag_title')
+    Tag.objects.create(blog_id=blog_id, title=title)
+    response = {
+        'status': True,
+        'user': request.user.username
+    }
+
     return JsonResponse(response)

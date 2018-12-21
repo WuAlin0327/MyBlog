@@ -81,7 +81,7 @@ AUTH_USER_MODEL='blog.UserInfo'
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
-
+LOGIN_URL = '/home/'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',

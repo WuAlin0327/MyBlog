@@ -29,7 +29,13 @@ urlpatterns = [
     path('comment/', views.comment),
     re_path(r'^$', views.login, ),
     path('logout/', views.logout),
+    path('upload/',views.upload),
     path('register/', views.register),
+    path('add_category/',views.add_category),
+    path('add_tag/',views.add_tag),
+    re_path('(?P<username>\w+)/manage_article/$', views.manage_article),
+    re_path('(?P<username>\w+)/remove/(?P<article_id>\d+)/$', views.remove_article),
+    re_path('(?P<username>\w+)/edit/(?P<article_id>\d+)/$', views.edit_article),
     re_path('media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path('(?P<username>\w+)/articles/(?P<article_id>\d+)/$', views.article_detail),
     # 个人站点URL
