@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+
+{% block title_link %}
+    <title>编辑文章</title>
+{% endblock %}
+
+{% block layout %}
+    <div class="jumbotron">
+        <div>
+
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab"
+                                                          data-toggle="tab">编辑文章</a></li>
+
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="home">
+                    <hr>
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        <div>
+                            <label for="title">文章标题</label>
+                            <input type="text" id="title" class="form-control" name="title" value="{{ article.title }}">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="contetn">文章内容</label>
+                            <textarea name="content" id="contetn" cols="30" rows="10" class="form-control" >{{ article.content|safe }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-success" value="提交">
+
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script charset="utf-8" src="/static/kindeditor/kindeditor-all-min.js"></script>
+    <script>
+        KindEditor.ready(function (K) {
+            window.editor = K.create('#contetn',{
+                width:'100%',
+                height:'500px',
+                resizeType:0,
+                uploadJson:'/upload/',
+                extraFileUploadParams:{
+                    csrfmiddlewaretoken:$('[name="csrfmiddlewaretoken"]').val(),
+                },
+            });
+        });
+
+    </script>
+{% endblock %}
