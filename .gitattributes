@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+*.js linguist-language=python_Django
+
+*.css linguist-language=python_Django
+
+*.html linguist-language=python_Django
